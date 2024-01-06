@@ -1,0 +1,101 @@
+```{r}
+#load data
+c.data <- read_csv(file = "~/SC321/Reports/Report 3/dar3_cars.csv")
+car.df <- data.frame(c.data)
+car.df <- car.df %>% select(-Make,-Model)
+print(car.df)
+```
+Looking at the data
+```{r}
+car.df$avgPrice <- ((car.df$LowPrice + car.df$HighPrice) / 2)
+car.df$Log.avgP <- log(car.df$avgPrice)
+my.lm <- lm(car.df$avgPrice ~ Seating + Acc060 + Weight)
+summary(my.lm)
+plot(my.lm)
+```
+histograms to check normality
+```{r}
+hist(car.df$avgPrice)
+hist(car.df$Log.avgP)
+```
+plots that asnwer questions
+```{r}
+boxplot(car.df$Log.avgP ~ Drive)
+scatterplot(HwyMPG, car.df$Log.avgP)
+tapply(car.df$Log.avgP, Drive, summary)
+```
+```{r}
+library(leaps)
+trims <- summary(regsubsets(car.df$Log.avgP ~ HwyMPG + Seating + Drive + Acc060 + Weight, nbest=2, nvmax=6, data=cars))
+names(trims)
+Sub <- trims$which
+R2 <- round(100*trims$rsq, 1)
+adjR2 <- round(100*trims$adjr2, 1)
+Cp <- round(trims$cp, 1)
+cbind(as.data.frame(Sub), R2, adjR2, Cp)
+```
+This is the simple model
+```{r}
+r.mlr <- lm(car.df$Log.avgP ~  HwyMPG + Seating + Drive + Acc060 + Weight)
+summary(r.mlr)
+```
+```{r}
+step(my.lm)
+```
+```{r}
+empty.lm <- lm(car.df$Log.avgP ~ NULL)
+step(empty.lm, car.df$Log.avgP ~ Seating + Drive + Acc060 + Weight + HwyMPG, direction="forward")
+```
+```{r}
+plot(r.mlr)
+library(car)
+vif(r.mlr) # weight is a little high *two puffs on a joint high not too bad*
+```
+This is the complex model
+```{r}
+library(rpart)
+cars.rt <- rpart(car.df$Log.avgP ~ HwyMPG + Drive + Acc060 + Seating + Weight)
+par(xpd = TRUE)
+plot(cars.rt)
+text(cars.rt, pretty=0)
+cars.rt
+printcp(cars.rt)
+```
+
+```{r}
+i.mlr <- lm(car.df$Log.avgP ~ Drive + Weight + Acc060 + HwyMPG + Seating + I(Weight^2) + I(Acc060^2) + Acc060:Weight +  Weight:HwyMPG)
+summary(i.mlr)
+```
+```{r}
+anova(r.mlr, i.mlr) # definitely makes it better
+step(i.mlr)
+```
+
+```{r}
+best.i <- lm(car.df$Log.avgP ~ Drive + Weight + Acc060 + HwyMPG + Seating + I(Acc060^2) + Weight:Acc060)
+summary(best.i)
+```
+```{r}
+anova(r.mlr, i.mlr)
+```
+```{r}
+sum.lm <- lm(car.df$Log.avgP ~ HwyMPG)
+summary(sum.lm)
+```
+```{r}
+my.lm <- lm(car.df$Log.avgP ~ HwyMPG)
+summary(my.lm)
+plot(my.lm$fitted.values, my.lm$residuals)
+abline(0,0)
+hist(my.lm$residuals)
+t.test(HwyMPG, car.df$Log.avgP)
+```
+```{r}
+my.lm <- lm(car.df$Log.avgP ~ Drive)
+my.anova <- aov(my.lm)
+summary(my.anova)
+plot(my.lm$fitted.values, my.lm$residuals)
+abline(0,0)
+hist(my.lm$residuals)
+```
+
