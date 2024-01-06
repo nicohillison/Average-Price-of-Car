@@ -1,0 +1,2 @@
+# Average Price of Car
+ I will be researching and analyzing data from a file that contains information about 110 new car models made in the year 2020. What I will be trying to accomplish is creating two models to predict the average price of a car. One model will be more complex than the other. After creating both models, I will discuss which model is more useful and generally better. Other topics that will be discussed are the association between fuel economy and price for the new car models and the drive type of each car and price.
